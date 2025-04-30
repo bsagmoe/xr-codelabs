@@ -17,10 +17,8 @@
 package com.example.android.xrfundamentals.ui.component
 
 import androidx.annotation.DrawableRes
-import androidx.compose.foundation.background
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -36,8 +34,7 @@ fun ToggleSpaceModeButton(modifier: Modifier = Modifier) {
 
     if (LocalSpatialCapabilities.current.isSpatialUiEnabled) {
         ToggleSpaceModeButton(
-            modifier = modifier
-                .background(MaterialTheme.colorScheme.secondaryContainer),
+            modifier = modifier,
             contentDescription = "Request Home Space mode",
             iconResource = R.drawable.ic_home_space_mode,
             onClick = { spatialConfiguration.requestHomeSpaceMode() }
@@ -59,7 +56,7 @@ fun ToggleSpaceModeButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    IconButton(
+    FilledTonalIconButton(
         modifier = modifier,
         onClick = onClick
     ) {

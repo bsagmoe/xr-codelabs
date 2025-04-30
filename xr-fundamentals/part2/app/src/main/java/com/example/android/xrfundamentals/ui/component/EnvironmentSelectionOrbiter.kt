@@ -49,7 +49,7 @@ fun EnvironmentSelectionOrbiter(
             modifier = modifier,
             onClick = onClick,
         ) {
-            Icon(painterResource(R.drawable.ic_landscape_24), "Show environment selection dialog")
+            Icon(painterResource(R.drawable.baseline_landscape_24), "Show environment selection dialog")
         }
     }
 }

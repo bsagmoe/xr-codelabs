@@ -20,48 +20,25 @@ import androidx.xr.scenecore.ExrImage
 import androidx.xr.scenecore.GltfModel
 import androidx.xr.scenecore.Session
 import androidx.xr.scenecore.SpatialEnvironment
-import androidx.xr.scenecore.SpatialEnvironment.SetSpatialEnvironmentPreferenceChangeApplied
-import androidx.xr.scenecore.SpatialEnvironment.SetSpatialEnvironmentPreferenceChangePending
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.guava.await
-import kotlinx.coroutines.launch
 
-class EnvironmentController(
-    private val session: Session,
-    private val scope: CoroutineScope
-) {
-    fun setSpatialEnvironmentPreference(
-        environmentOption: EnvironmentOption,
-        onPending: () -> Unit = {},
-        onApplied: () -> Unit = {},
-        onFailure: (Exception) -> Unit = {},
-    ) {
-        scope.launch {
-            try {
-                val skybox = environmentOption.skyboxPath?.let {
-                    ExrImage.create(session, it)
-                }
-
-                val geometryFuture = environmentOption.geometryPath?.let {
-                    GltfModel.create(session, it)
-                }
-
-                val geometry = geometryFuture?.await()
-
-                val result = session.spatialEnvironment.setSpatialEnvironmentPreference(
-                    SpatialEnvironment.SpatialEnvironmentPreference(
-                        skybox,
-                        geometry
-                    )
-                )
-
-                when (result) {
-                    is SetSpatialEnvironmentPreferenceChangePending -> onPending();
-                    is SetSpatialEnvironmentPreferenceChangeApplied -> onApplied();
-                }
-            } catch (e: Exception) {
-                onFailure(e)
-            }
+class EnvironmentController(private val session: Session) {
+    suspend fun setSpatialEnvironmentPreference(
+        environmentOption: EnvironmentOption
+    ): SpatialEnvironment.SetSpatialEnvironmentPreferenceResult {
+        val skybox = environmentOption.skyboxPath?.let {
+            ExrImage.create(session, it)
         }
+
+        val geometry = environmentOption.geometryPath?.let {
+            GltfModel.create(session, it).await()
+        }
+
+        return session.spatialEnvironment.setSpatialEnvironmentPreference(
+            SpatialEnvironment.SpatialEnvironmentPreference(
+                skybox,
+                geometry
+            )
+        )
     }
 }

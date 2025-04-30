@@ -16,6 +16,7 @@
 
 package com.example.android.xrfundamentals
 
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -53,6 +54,7 @@ import com.example.android.xrfundamentals.ui.component.SecondaryCardList
 import com.example.android.xrfundamentals.ui.component.XRFundamentalsTopAppBar
 import com.example.android.xrfundamentals.ui.layout.CompactLayout
 import com.example.android.xrfundamentals.ui.layout.ExpandedLayout
+import kotlinx.coroutines.launch
 
 @Composable
 fun XRFundamentalsApp(
@@ -98,8 +100,8 @@ fun XRFundamentalsApp(
     Subspace {
         val session = LocalSession.current
         val scope = rememberCoroutineScope()
-        val environmentController = remember(session, scope) {
-            EnvironmentController(checkNotNull(session), scope)
+        val environmentController = remember(session) {
+            EnvironmentController(checkNotNull(session))
         }
 
         SpatialRow(
@@ -126,13 +128,16 @@ fun XRFundamentalsApp(
                         initialEnvironmentOption = currentEnvironmentOption,
                         onDismissRequest = { showDialog = false },
                         onEnvironmentOptionSelected = { environmentOption: EnvironmentOption ->
-                            environmentController.setSpatialEnvironmentPreference(
-                                environmentOption,
-                                onApplied = {
+                            showDialog = false
+
+                            scope.launch {
+                                try {
+                                    environmentController.setSpatialEnvironmentPreference(environmentOption)
                                     currentEnvironmentOption = environmentOption
-                                    showDialog = false
+                                } catch (e: Exception) {
+                                    Log.e("XRFundamentalsApp", "The environment preference could not be set: $e")
                                 }
-                            )
+                            }
                         }
                     )
                 }
