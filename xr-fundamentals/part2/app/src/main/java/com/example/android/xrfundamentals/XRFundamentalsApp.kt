@@ -16,7 +16,6 @@
 
 package com.example.android.xrfundamentals
 
-import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -43,11 +42,8 @@ import androidx.xr.compose.subspace.SpatialRow
 import androidx.xr.compose.subspace.layout.SubspaceModifier
 import androidx.xr.compose.subspace.layout.height
 import androidx.xr.compose.subspace.layout.width
-import com.example.android.xrfundamentals.environment.DEFAULT_ENVIRONMENT
 import com.example.android.xrfundamentals.environment.ENVIRONMENT_OPTIONS
 import com.example.android.xrfundamentals.environment.EnvironmentController
-import com.example.android.xrfundamentals.environment.EnvironmentOption
-import com.example.android.xrfundamentals.ui.component.EnvironmentSelectionDialog
 import com.example.android.xrfundamentals.ui.component.EnvironmentSelectionOrbiter
 import com.example.android.xrfundamentals.ui.component.PrimaryCard
 import com.example.android.xrfundamentals.ui.component.SecondaryCardList
@@ -96,7 +92,7 @@ fun XRFundamentalsApp(
         }
     }
 
-    var currentEnvironmentOption by remember { mutableStateOf(DEFAULT_ENVIRONMENT) }
+    var currentEnvironmentOptionIndex by remember { mutableStateOf(0) }
     Subspace {
         val session = LocalSession.current
         val scope = rememberCoroutineScope()
@@ -112,35 +108,22 @@ fun XRFundamentalsApp(
                     .width(1024.dp)
                     .height(800.dp)
             ) {
-                var showDialog by remember { mutableStateOf(false) }
 
                 // Only show the environment selection orbiter if the app is actually able to
                 // set the environment
                 if (LocalSpatialCapabilities.current.isAppEnvironmentEnabled) {
                     EnvironmentSelectionOrbiter(
-                        onClick = { showDialog = true }
-                    )
-                }
-
-                if (showDialog) {
-                    EnvironmentSelectionDialog(
-                        environmentOptions = ENVIRONMENT_OPTIONS,
-                        initialEnvironmentOption = currentEnvironmentOption,
-                        onDismissRequest = { showDialog = false },
-                        onEnvironmentOptionSelected = { environmentOption: EnvironmentOption ->
-                            showDialog = false
-
+                        onClick = {
                             scope.launch {
-                                try {
-                                    environmentController.setSpatialEnvironmentPreference(environmentOption)
-                                    currentEnvironmentOption = environmentOption
-                                } catch (e: Exception) {
-                                    Log.e("XRFundamentalsApp", "The environment preference could not be set: $e")
-                                }
+                                currentEnvironmentOptionIndex = (currentEnvironmentOptionIndex + 1) % ENVIRONMENT_OPTIONS.size
+                                environmentController.setSpatialEnvironmentPreference(
+                                    ENVIRONMENT_OPTIONS[currentEnvironmentOptionIndex]
+                                )
                             }
                         }
                     )
                 }
+
                 Scaffold(
                     topBar = { XRFundamentalsTopAppBar() }
                 ) { innerPadding ->
