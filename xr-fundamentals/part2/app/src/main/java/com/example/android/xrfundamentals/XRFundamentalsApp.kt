@@ -38,13 +38,13 @@ import androidx.window.core.layout.WindowWidthSizeClass
 import androidx.xr.compose.platform.LocalSession
 import androidx.xr.compose.platform.LocalSpatialCapabilities
 import androidx.xr.compose.spatial.Subspace
+import androidx.xr.compose.subspace.SpatialCurvedRow
 import androidx.xr.compose.subspace.SpatialPanel
-import androidx.xr.compose.subspace.SpatialRow
 import androidx.xr.compose.subspace.layout.SubspaceModifier
 import androidx.xr.compose.subspace.layout.height
 import androidx.xr.compose.subspace.layout.width
+import androidx.xr.scenecore.scene
 import com.example.android.xrfundamentals.environment.ENVIRONMENT_OPTIONS
-import com.example.android.xrfundamentals.environment.EnvironmentController
 import com.example.android.xrfundamentals.ui.component.EnvironmentSelectionOrbiter
 import com.example.android.xrfundamentals.ui.component.PrimaryCard
 import com.example.android.xrfundamentals.ui.component.SecondaryCardList
@@ -95,13 +95,10 @@ fun XRFundamentalsApp(
 
     var currentEnvironmentOptionIndex by remember { mutableStateOf(0) }
     Subspace {
-        val session = LocalSession.current
+        val session = checkNotNull(LocalSession.current)
         val scope = rememberCoroutineScope()
-        val environmentController = remember(session) {
-            EnvironmentController(checkNotNull(session))
-        }
 
-        SpatialRow(
+        SpatialCurvedRow(
             curveRadius = 825.dp
         ) {
             SpatialPanel(
@@ -116,9 +113,13 @@ fun XRFundamentalsApp(
                     EnvironmentSelectionOrbiter(
                         onClick = {
                             scope.launch {
-                                currentEnvironmentOptionIndex = (currentEnvironmentOptionIndex + 1) % ENVIRONMENT_OPTIONS.size
-                                environmentController.setSpatialEnvironmentPreference(
-                                    ENVIRONMENT_OPTIONS[currentEnvironmentOptionIndex]
+                                currentEnvironmentOptionIndex =
+                                    (currentEnvironmentOptionIndex + 1) % ENVIRONMENT_OPTIONS.size
+
+                                session.scene.spatialEnvironment.setSpatialEnvironmentPreference(
+                                    ENVIRONMENT_OPTIONS[currentEnvironmentOptionIndex].toSpatialEnvironmentPreference(
+                                        session
+                                    )
                                 )
                             }
                         }
